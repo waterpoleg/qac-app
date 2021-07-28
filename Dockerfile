@@ -1,14 +1,30 @@
-FROM node:16
+### STAGE 1: Build
+#FROM node:latest as builder
+FROM node:16-alpine as builder
 
-EXPOSE 3000
+RUN mkdir /app
+WORKDIR /app
 
-RUN mkdir -p /home/node/app
-WORKDIR /home/node/app
+ENV PATH /app/node_modules/.bin:$PATH
 
-COPY package.json /home/node/app
-COPY src /home/node/app/src
-COPY public /home/node/app/public
+COPY ./package.json /package.json
+COPY ./nginx.conf /nginx.conf
 
-RUN npm i
+RUN npx yarn cache clean
+RUN npx yarn install --production=true --force
 
-CMD npm run start
+COPY ./ /
+
+RUN npx yarn build
+
+#CMD npm run start
+
+### STAGE 2: Production Environment ###
+FROM nginx:latest
+
+COPY --from=builder ./build /var/www
+COPY --from=builder ./nginx.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 80 443
+
+CMD ["nginx", "-g", "daemon off;"]
