@@ -2,7 +2,7 @@ const Loader = () => {
     const url = `http://localhost:5000/swagger/v1/swagger.json`;
     const url2 = `http://jsonplaceholder.typicode.com/posts`;
 
-    fetch(url2)//, {mode: 'no-cors'}
+    fetch(url2)//, {mode: 'no-cors'})
         .then(response => {
             return response.json();
         })
